@@ -23,7 +23,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
             customer_id int ,
             amount int ,
             account_name string
-        )")?;
+        )engine='columnar'")?;
 
     // let payments = vec![
     //     Payment { customer_id: 1, amount: 2, account_name: None },
@@ -33,7 +33,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     //     Payment { customer_id: 9, amount: 10, account_name: Some("bar".into()) },
     // ];
 
-    conn.query_drop("INSERT INTO payment (customer_id, amount, account_name) VALUES (1,2,'tom')")?;
+    conn.query_drop("INSERT INTO payment (customer_id, amount, account_name) VALUES (1,1,'tom'), (2,2,'jack')")?;
 
     // Now let's insert payments to the database
     // conn.exec_batch(
@@ -56,7 +56,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         )?;
 
     for item in selected_payments{
-        print!("{:?}",item);
+        println!("{:?}",item);
     }
 
 
