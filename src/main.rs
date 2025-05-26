@@ -71,6 +71,20 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+    //https://www.cnblogs.com/jaciots/p/14761611.html
+    //方式1：流式查询  数据逐行读取，数据不会存储在内存中
+    conn.query_iter("Select id,account_name,amount from payment").unwrap()
+    .for_each(|row|{
+        let r:(i64,String,i32)=from_row(row.unwrap());
+        println!("id={},name={},age={}",r.0,r.1,r.2);
+    });
+
+    // //方式2：将数据集取出存储在Vec中
+    let res:Vec<(i64,String,i32)>=conn.query("Select id,account_name,amount from payment").unwrap();
+    for r in res{
+        println!("id={},name={},age={}",r.0,r.1,r.2);
+    }
+
 
     // Let's make sure, that `payments` equals to `selected_payments`.
     // Mysql gives no guaranties on order of returned rows
