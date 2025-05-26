@@ -6,6 +6,7 @@ struct Payment {
     customer_id: i32,
     amount: i32,
     account_name: Option<String>,
+    remark: Option<String>,
 }
 
 
@@ -22,7 +23,8 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         r"CREATE TABLE IF NOT EXISTS payment (
             customer_id int ,
             amount int ,
-            account_name string
+            account_name string,
+            remark text
         )engine='columnar'")?;
 
     // let payments = vec![
@@ -33,7 +35,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     //     Payment { customer_id: 9, amount: 10, account_name: Some("bar".into()) },
     // ];
 
-    conn.query_drop("INSERT INTO payment (customer_id, amount, account_name) VALUES (1,1,'tom'), (2,2,'jack')")?;
+    conn.query_drop("INSERT INTO payment (customer_id, amount, account_name,remark) VALUES (1,1,'tom','hello tom'), (2,2,'jack','helo jack')")?;
 
     // Now let's insert payments to the database
     // conn.exec_batch(
@@ -49,9 +51,9 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     // Let's select payments from database. Type inference should do the trick here.
     let selected_payments = conn
         .query_map(
-            "SELECT customer_id, amount, account_name from payment",
-            |(customer_id, amount, account_name)| {
-                Payment { customer_id, amount, account_name }
+            "SELECT customer_id, amount, account_name,remark from payment",
+            |(customer_id, amount, account_name,remark)| {
+                Payment { customer_id, amount, account_name,remark }
             },
         )?;
 
