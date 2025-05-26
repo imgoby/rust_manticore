@@ -88,7 +88,11 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     let row: Row = conn.query_first("select 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12")?.unwrap();
     for i in 0..row.len() {
-        println!("{:?}",row[i])
+        // println!("{:?}",row[i]);
+        println!("{}",from_value::<i32>(row[i].clone()))
+
+        // let x mysql_common::value::Value=row[i]
+        // print_type_of(&row[i]);
     }
 
 
@@ -99,4 +103,8 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     // println!("Yay!");
 
     Ok(())
+}
+
+fn print_type_of<T>(_: &T) {
+    println!("{}", std::any::type_name::<T>())
 }
