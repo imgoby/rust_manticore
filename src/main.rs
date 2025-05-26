@@ -86,6 +86,12 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     }
 
 
+    let row: Row = conn.query_first("select 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12")?.unwrap();
+    for i in 0..row.len() {
+        println!("{:?}",row[i])
+    }
+
+
     // Let's make sure, that `payments` equals to `selected_payments`.
     // Mysql gives no guaranties on order of returned rows
     // without `ORDER BY`, so assume we are lucky.
