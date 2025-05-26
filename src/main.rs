@@ -61,6 +61,15 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         println!("{:?}",item);
     }
 
+    let val: Option<u64> = conn.query_first("SELECT count(*) from payment")?;
+    match val{
+        Some(v)=>{
+            println!("{}",v);
+        },
+        None=>{
+            println!("None");
+        }
+    }
 
 
     // Let's make sure, that `payments` equals to `selected_payments`.
