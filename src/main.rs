@@ -96,6 +96,15 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     }
 
 
+
+    let res:Vec<Row>=conn.query("Select id,account_name,amount from payment").unwrap();
+    for row in res{
+        println!("{}",from_value::<i64>(row[0].clone()));
+        println!("{}",from_value::<String>(row[1].clone()));
+        println!("{}",from_value::<i32>(row[2].clone()));
+    }
+
+
     // Let's make sure, that `payments` equals to `selected_payments`.
     // Mysql gives no guaranties on order of returned rows
     // without `ORDER BY`, so assume we are lucky.
