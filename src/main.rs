@@ -133,20 +133,11 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         println!("{}",from_value::<i64>(row[3].clone()));
 
         let timestamp: i64 =from_value::<i64>(row[3].clone());
+        let local_str=timestamp_to_localtime_string(timestamp,"%Y-%m-%d %H:%M:%S");
+        println!("local_str:{}",local_str);
 
-        let naive = NaiveDateTime::from_timestamp(timestamp, 0);
-        let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
-
-
-        
-
-        let newdate = datetime.format("%Y-%m-%d %H:%M:%S");
-        println!("newdate:{}",newdate);
-
-        let local_now: DateTime<Local> = datetime.with_timezone(&Local);
-
-        let newdate = local_now.format("%Y-%m-%d %H:%M:%S");
-        println!("local_now:{}",newdate);
+        let timestamp2=localtime_string_to_timestamp(&local_str,"%Y-%m-%d %H:%M:%S");
+        println!("timestamp2:{}",timestamp2);
     }
 
 
@@ -161,4 +152,36 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
 fn print_type_of<T>(_: &T) {
     println!("{}", std::any::type_name::<T>())
+}
+
+
+
+//时间戳格式化本地时间
+fn timestamp_to_localtime_string(timestamp: i64,fmt:&str) ->String{
+    let naive = NaiveDateTime::from_timestamp(timestamp, 0);
+    let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
+
+    let local_now: DateTime<Local> = datetime.with_timezone(&Local);
+
+    let local_string = local_now.format(fmt);
+    return format!("{}",local_string)
+}
+
+//本地时间转时间戳
+fn localtime_string_to_timestamp(date_string: &str,fmt:&str) ->i64{
+    match NaiveDateTime::parse_from_str(date_string, fmt) {
+        Ok(naive_date_time) => {
+            let parsed = Local.from_local_datetime(&naive_date_time).single();
+            match parsed {
+                Some(parsed) => {
+                    parsed.timestamp()
+                }
+                None => 0,
+            }
+        },
+        Err(e) => {
+            println!("Error parsing datetime: {}", e);
+            return 0;
+        }
+    }
 }
