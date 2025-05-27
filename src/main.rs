@@ -1,5 +1,7 @@
 use mysql::*;
 use mysql::prelude::*;
+use chrono::prelude::*;
+use chrono::{DateTime, Utc};
 
 #[derive(Debug, PartialEq, Eq)]
 struct Payment {
@@ -7,6 +9,7 @@ struct Payment {
     amount: i32,
     account_name: Option<String>,
     remark: Option<String>,
+    post_date: i64
 }
 
 
@@ -24,7 +27,8 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
             customer_id int ,
             amount int ,
             account_name string,
-            remark text
+            remark text,
+            post_date timestamp
         )engine='columnar'")?;
 
     // let payments = vec![
@@ -35,7 +39,31 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     //     Payment { customer_id: 9, amount: 10, account_name: Some("bar".into()) },
     // ];
 
-    conn.query_drop("INSERT INTO payment (customer_id, amount, account_name,remark) VALUES (1,1,'tom','hello tom'), (2,2,'jack','helo jack')")?;
+    //设置时区
+    // SET GLOBAL timezone = 'Asia/Shanghai';
+
+    let local: DateTime<Local> = Local::now();
+    let local_str = local.format("%Y-%m-%dT%H:%M:%s").to_string();
+    println!("local_str:{}",local_str);
+
+    let timestamp: i64 = local.timestamp();
+
+    //%Y-%m-%d'T'%H:%M:%S%Z
+    //2025-05-27'T'11:42:32+08:00
+
+    //%Y-%m-%dT%H:%M:%E*S%Z 不支持
+
+    //%Y-%m-%dT%H:%M:%s
+    //2025-05-27T11:46:1748317579
+
+    let utc_now: DateTime<Utc> = Utc::now();
+    // let utc_str = utc_now.format("%Y-%m-%d %H:%M:%S %z");
+    // let utc_str = utc_now.format("%Y-%m-%dT%H:%M:%s");
+    let utc_str = utc_now.format("%Y-%m-%d'T'%H:%M:%S%Z");
+    println!("utc_str:{}",utc_str);
+
+    let sql=format!("INSERT INTO payment (customer_id, amount, account_name,remark,post_date) VALUES (1,1,'tom','hello tom',{}), (2,2,'jack','helo jack',{})",timestamp,timestamp);
+    conn.query_drop(sql)?;
 
     // Now let's insert payments to the database
     // conn.exec_batch(
@@ -51,9 +79,9 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     // Let's select payments from database. Type inference should do the trick here.
     let selected_payments = conn
         .query_map(
-            "SELECT customer_id, amount, account_name,remark from payment",
-            |(customer_id, amount, account_name,remark)| {
-                Payment { customer_id, amount, account_name,remark }
+            "SELECT customer_id, amount, account_name,remark,post_date from payment",
+            |(customer_id, amount, account_name,remark,post_date)| {
+                Payment { customer_id, amount, account_name,remark,post_date }
             },
         )?;
 
@@ -73,10 +101,10 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     //https://www.cnblogs.com/jaciots/p/14761611.html
     //方式1：流式查询  数据逐行读取，数据不会存储在内存中
-    conn.query_iter("Select id,account_name,amount from payment").unwrap()
+    conn.query_iter("Select id,account_name,amount,post_date from payment").unwrap()
     .for_each(|row|{
-        let r:(i64,String,i32)=from_row(row.unwrap());
-        println!("id={},name={},age={}",r.0,r.1,r.2);
+        let r:(i64,String,i32,u32)=from_row(row.unwrap());
+        println!("id={},name={},age={},post_date={}",r.0,r.1,r.2,r.3);
     });
 
     // //方式2：将数据集取出存储在Vec中
@@ -97,11 +125,28 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
 
 
-    let res:Vec<Row>=conn.query("Select id,account_name,amount from payment").unwrap();
+    let res:Vec<Row>=conn.query("Select id,account_name,amount,post_date from payment").unwrap();
     for row in res{
         println!("{}",from_value::<i64>(row[0].clone()));
         println!("{}",from_value::<String>(row[1].clone()));
         println!("{}",from_value::<i32>(row[2].clone()));
+        println!("{}",from_value::<i64>(row[3].clone()));
+
+        let timestamp: i64 =from_value::<i64>(row[3].clone());
+
+        let naive = NaiveDateTime::from_timestamp(timestamp, 0);
+        let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
+
+
+        
+
+        let newdate = datetime.format("%Y-%m-%d %H:%M:%S");
+        println!("newdate:{}",newdate);
+
+        let local_now: DateTime<Local> = datetime.with_timezone(&Local);
+
+        let newdate = local_now.format("%Y-%m-%d %H:%M:%S");
+        println!("local_now:{}",newdate);
     }
 
 
