@@ -5,3 +5,5 @@ edition = "2024"
 
 [dependencies]
 mysql = "26.0.0"
+chrono = { version = "0.4.37", features = ["serde"] }
+time = { version = "0.3.37", features = ["macros"] }
