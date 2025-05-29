@@ -141,6 +141,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     }
 
 
+
     // Let's make sure, that `payments` equals to `selected_payments`.
     // Mysql gives no guaranties on order of returned rows
     // without `ORDER BY`, so assume we are lucky.
@@ -150,8 +151,19 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+pub fn next_day_timestamp(day:i64) ->i64{
+    return day+24*60*60
+}
+
 fn print_type_of<T>(_: &T) {
     println!("{}", std::any::type_name::<T>())
+}
+
+
+pub fn localdate_string_to_timestamp(date_string: &str,fmt:&str) ->i64{
+    let datetime_string=format!("{} 00:00:00",date_string);
+    let datetime_fmt=format!("{} %H:%M:%S",fmt);
+    return localtime_string_to_timestamp(datetime_string.as_str(),datetime_fmt.as_str())
 }
 
 
