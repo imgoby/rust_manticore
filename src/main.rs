@@ -14,7 +14,7 @@ struct Payment {
 
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
-    let url = "mysql://root@192.168.0.211:9306/Manticore";
+    let url = "mysql://root@192.168.0.211:9306/Manticore?reset_connection=false";
     // # Opts::try_from(url)?;
     // # let url = get_opts();
     let pool = Pool::new(url)?;
